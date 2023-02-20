@@ -1,6 +1,7 @@
 from flask import Blueprint, g, escape, session, redirect, render_template, request, jsonify, Response, flash
 from app import DAO
 from Misc.functions import *
+from serverless_wsgi import *
 
 from Controllers.UserManager import UserManager
 
@@ -8,11 +9,10 @@ user_view = Blueprint('user_routes', __name__, template_folder='/templates')
 
 user_manager = UserManager(DAO)
 
-@user_view.route('/', methods=['GET'])
-def home():
-	g.bg = 1
-
-	user_manager.user.set_session(session, g)
+@user_view.route('/info', methods=['GET'])
+def info(event, context):	
+  user_info = serverless_wsgi.handle_request(app, event, context)
+	user_manager.user.set_session(session, user_info)
 	print(g.user)
 
 	return render_template('home.html', g=g)
